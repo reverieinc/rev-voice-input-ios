@@ -1,1 +1,3 @@
-# rev-voice-input-ios
+# ReverieVoiceInput
+
+A description of this package.
