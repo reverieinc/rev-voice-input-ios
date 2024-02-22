@@ -212,21 +212,10 @@ class VoiceSearchUiBottomSheet: UIViewController ,StreamingDelegate{
 		sttStreaming.stopStreaming()
 	
 		
-	}/*
-	func isPortrait() -> Bool {
-		let orientation = UIDevice.current.orientation
-		return orientation == .portrait || orientation == .portraitUpsideDown
 	}
-	
-	func isLandscape() -> Bool {
-		let orientation = UIDevice.current.orientation
-		return orientation == .landscapeLeft || orientation == .landscapeRight
-	}*/
 	func setupUI() {
 		let tapGesture = UITapGestureRecognizer(target: self, action: #selector(micGestureMethod(_:)))
-	//	let screenSize:CGRect = UIScreen.main.bounds
-		
-		// Add the gesture recognizer to your view
+
 		self.micImageView.isUserInteractionEnabled=true
 		self.outputLabel.isUserInteractionEnabled=true
 		self.micImageView.addGestureRecognizer(tapGesture)
@@ -305,11 +294,7 @@ class VoiceSearchUiBottomSheet: UIViewController ,StreamingDelegate{
 		startContinuousRotation(view: progressCircleView)
 	}
 	
-	@objc func micImageViewTapped() {
-		// Implement the action to be performed when the mic image is tapped
-		
-		Logger.printLog(string:"Mic image tapped!")
-	}
+	
 	/// Start Rotating Animation
 	func startContinuousRotation(view: UIView) {
 		let rotationAnimation = CAKeyframeAnimation(keyPath: "transform.rotation.z")
