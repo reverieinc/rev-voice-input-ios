@@ -15,8 +15,6 @@
  */
 
 import Foundation
-
-
 public struct Log{
     
     public static var DEBUG = false
