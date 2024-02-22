@@ -114,10 +114,10 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
         let request = URLRequest(url: URL(string: urlStr)!)
  
         socket = WebSocket(request: request)
-        
         socket.delegate = self
+       
         let timeoutInterval: TimeInterval = 10
-   timer =     Timer.scheduledTimer(withTimeInterval: timeoutInterval, repeats: false) { [weak self] _ in
+        timer =     Timer.scheduledTimer(withTimeInterval: timeoutInterval, repeats: false) { [weak self] _ in
             if(!(self!.isSocketOpen))
                    { self?.socket.disconnect()
                        self?.engine.stop()
@@ -126,10 +126,6 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
                   
                     self?.delegate?.onError(data: "Connection Timeout")}
                }
-  
-//        Utilities.delay(delay: 0.5) {
-//            self.socket.connect()
-//        }
             self.socket.connect()
 
     }
@@ -186,14 +182,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
                 
             }
             
-//            if let str = convertToDictionary(text: text), let displayText = str[JsonLabels.display_text] as? String, displayText != "", let final = str[JsonLabels.final] as? Bool, final {
-//                self.inputNode.reset()
-//                self.inputNode.removeTap(onBus: 0)
-//                Logger.printLog(string: "Disconnecting")
-//                self.engine.stop()
-//                self.isSocketOpen=false
-//                self.socket.disconnect()
-//            }
+
             
         case .binary(let data):
             Logger.printLog(string:"Received data: \(data.count)")
@@ -290,22 +279,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
                 let data = self.toNSData(PCMBuffer: pcmBuffer)
                 // Logger.printLog(string:"Socket Write")
                 self.dataBuffer.append(data)
-//                Utilities.delay(delay: 0.5) { [self] in
-//                    if(self.isSocketOpen){
-//                        self.socket.write(data: self.dataBuffer)
-//                        {
-//                            Logger.printLog(string:"Socket Write Complete")
-//                            self.inputNode.reset()
-//                            self.dataBuffer.removeAll()
-//                        }}
-//                    if(isDissmissed)
-//                    {
-//                        engine.stop()
-//                        engine.inputNode.reset()
-//                        socket.disconnect()
-//                        
-//                    }
-//                }
+
                 
                 if(self.isSocketOpen){
                     self.socket.write(data: self.dataBuffer)
@@ -347,32 +321,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
         return nil
     }
     
-    class Utilities {
-        class func delay(delay: Double, closure: @escaping () -> ()) {
-            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                closure()
-            }
-        }
-        
-        class func backgroundQueue(closure: @escaping () -> ()) {
-            DispatchQueue.global(qos: .background).async {
-                closure()
-            }
-        }
-        
-        class func performInMainQueue(closure: @escaping () -> ()) {
-            DispatchQueue.main.async {
-                closure()
-                
-            }
-        }
-        
-        class func performInMainQueueSync(closure: @escaping () -> ()) {
-            DispatchQueue.main.sync {
-                closure()
-            }
-        }
-    }
+  
     
     
 }
