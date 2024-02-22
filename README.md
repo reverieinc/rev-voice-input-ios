@@ -71,7 +71,7 @@ Various constant values are provided in SDK for DOMAIN, LANGUAGES, and LOGGING p
 
 ## Integrate the SDK in Your Application
 
-1.Add the Swift Package using SPM and if using version lower than XCode 15 and Apple's  AVFAudio.framework without embedding
+1.Add the Swift Package using SPM and if using version lower than XCode 15 add Apple's  AVFAudio.framework without embedding
 
 ### iOS UiKit Integration
 
