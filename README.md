@@ -110,7 +110,7 @@ Various constant values are provided in SDK for DOMAIN, LANGUAGES, and LOGGING p
     ```sh
     voiceInput.startRecognition(on: self //CurrentViewController, voiceInputDelegates: self, // listener implemented class
     isUIRequired: true, //whether the UI is required
-    domain:Domain.VOICE_Input,lang:Languages.ENGLISH)
+    domain:Domain.VOICE_SEARCH,lang:Languages.ENGLISH)
     ```
 4. Stop the Input for final Result
     ```sh
