@@ -32,6 +32,8 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
     private var dataBuffer=Data()
     private var logging=Logging.TRUE
     private var isDissmissed=false
+    private var inProcess=false
+    
     //let networkMonitor = NetworkMonitor.shared
     public init(appId:String,apiKey:String,domain:String,lang:String,logging:String)
     {
@@ -70,15 +72,21 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
     }()
     
     public func startStreaming()
-    {   self.dataBuffer.removeAll()
+    { if(inProcess)
+        {  return
+    }
+        
+        self.dataBuffer.removeAll()
         socketSetup();
         recordData();
         isReceivedData=false
+        inProcess=true
         isDissmissed=false
         self.delegate?.onStartRecording(isTrue: true)
     }
     public func stopStreaming()
     {      self.isSocketOpen=false
+        inProcess=false
         isDissmissed=true
         timer?.invalidate()
         if(isSocketOpen)
@@ -87,12 +95,13 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
             engine.stop()
             self.delegate?.onEndRecording(isTrue: true)}
         self.engine.stop()
-
+        
     }
     public func stopStreamingForFinal()
     {            self.isSocketOpen=false
         self.engine.stop()
         self.engine.inputNode.reset()
+        inProcess=false
         
         timer?.invalidate()
         if let data = "--EOF--".data(using: .utf8) {
@@ -112,22 +121,22 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
         Logger.printLog(string:urlStr)
         
         let request = URLRequest(url: URL(string: urlStr)!)
- 
+        
         socket = WebSocket(request: request)
         socket.delegate = self
-       
+        
         let timeoutInterval: TimeInterval = 10
         timer =     Timer.scheduledTimer(withTimeInterval: timeoutInterval, repeats: false) { [weak self] _ in
             if(!(self!.isSocketOpen))
-                   { self?.socket.disconnect()
-                       self?.engine.stop()
-                       
-                       self?.delegate?.onEndRecording(isTrue: true)
-                  
-                    self?.delegate?.onError(data: "Connection Timeout")}
-               }
-            self.socket.connect()
-
+            { self?.socket.disconnect()
+                self?.engine.stop()
+                
+                self?.delegate?.onEndRecording(isTrue: true)
+                self?.inProcess=false
+                self?.delegate?.onError(data: "Connection Timeout")}
+        }
+        self.socket.connect()
+        
     }
     
     public func didReceive(event: Starscream.WebSocketEvent, client: Starscream.WebSocketClient) {
@@ -136,7 +145,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
             Logger.printLog(string:"Connected")
             timer?.invalidate()
             timer=nil
-           // inputNode.reset()
+            // inputNode.reset()
             isSocketOpen=true
             
             
@@ -147,10 +156,11 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
             }
             Logger.printLog(string:"Disconnected")
             isSocketOpen=false
-           
-        
+            inProcess=false
+            
+            
             self.delegate?.onEndRecording(isTrue: true)
-        
+            
             self.inputNode.reset()
             self.inputNode.removeTap(onBus: 0)
             
@@ -176,13 +186,14 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
                     self.engine.stop()
                     self.isSocketOpen=false
                     self.socket.disconnect()
+                    inProcess=false
                     
                 }
-               
+                
                 
             }
             
-
+            
             
         case .binary(let data):
             Logger.printLog(string:"Received data: \(data.count)")
@@ -199,6 +210,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
             self.inputNode.removeTap(onBus: 0)
             self.delegate?.onEndRecording(isTrue: true)
             self.engine.stop()
+            inProcess=false
             
             isSocketOpen=false
             Logger.printLog(string:"Cancelled")
@@ -207,6 +219,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
             self.inputNode.removeTap(onBus: 0)
             self.delegate?.onEndRecording(isTrue: true)
             self.engine.stop()
+            inProcess=false
             Logger.printLog(string:"Error Ns \(String(describing: error as? NSError))")
             self.isSocketOpen=false
             DispatchQueue.main.async {
@@ -228,6 +241,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
         
         Logger.printLog(string:error.localizedDescription)
         self.delegate?.onError(data: String(describing: error as? NSError))
+        inProcess=false
     }
     
     func toNSData(PCMBuffer: AVAudioPCMBuffer) -> Data {
@@ -279,7 +293,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
                 let data = self.toNSData(PCMBuffer: pcmBuffer)
                 // Logger.printLog(string:"Socket Write")
                 self.dataBuffer.append(data)
-
+                
                 
                 if(self.isSocketOpen){
                     self.socket.write(data: self.dataBuffer)
@@ -321,7 +335,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
         return nil
     }
     
-  
+    
     
     
 }
