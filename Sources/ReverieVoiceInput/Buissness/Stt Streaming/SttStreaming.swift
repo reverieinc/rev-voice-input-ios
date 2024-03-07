@@ -117,7 +117,12 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
     }
     
     func socketSetup() {
+        
         urlStr = "\(Constants.STREAM_URL)?apikey=\(apiKey)&appid=\(appId)&appname=stt_stream&src_lang=\(lang)&domain=\(domain)&logging=\(logging)"
+        if(Log.DEBUG)
+        {
+            urlStr=urlStr+"&debug=true"
+        }
         
         Logger.printLog(string:urlStr)
         
