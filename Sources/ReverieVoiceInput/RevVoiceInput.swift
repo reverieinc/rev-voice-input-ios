@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import Foundation
+
 import UIKit
-
-
 /**
  * This the Class for Initiating Voice Search
  * Wrapper Class for initiating Voice Search with and Without UI
@@ -35,6 +33,8 @@ public class RevVoiceInput{
     var logging:String
     
     
+    
+    
     ///Constructor call for RevVoiceSearch
     /// - Parameters:
     ///   - apikey:apikey provided to the client
@@ -48,6 +48,7 @@ public class RevVoiceInput{
         self.lang=lang
         self.domain = domain
         self.logging=logging
+       
         //networkMonitor.startMonitoring()
         
         
@@ -88,16 +89,16 @@ public class RevVoiceInput{
             
         }
             if(isUIRequired){
-                let  popupViewController = VoiceSearchUiBottomSheet(apiKey: apikey, appID: appId, lang: self.lang, domain: self.domain,voiceSearchResultDelegates: voiceInputDelegates,logging: logging)
+                let popupViewController = VoiceSearchUiBottomSheet(apiKey: apikey, appID: appId, lang: self.lang, domain: self.domain,voiceSearchResultDelegates: voiceInputDelegates,logging: logging)
                 let navigationController = TransparentNavigationController(rootViewController: popupViewController)
                 navigationController.modalPresentationStyle = .overCurrentContext
                 
                 viewController.present(navigationController, animated: true, completion: nil)}
             
             else{
-                
-                voiceSearchWithoutUi=VoiceInputWithoutUI( apiKey: apikey, appId:appId, domain:domain , lang:lang,  voiceSearchDelegate:voiceInputDelegates,logging: logging)
-                voiceSearchWithoutUi?.startStreaming()
+                if(!SttStreaming.inProcess)
+                {  voiceSearchWithoutUi=VoiceInputWithoutUI( apiKey: apikey, appId:appId, domain:domain , lang:lang,  voiceSearchDelegate:voiceInputDelegates,logging: logging)
+                    voiceSearchWithoutUi?.startStreaming()}
                 
             }
             
@@ -121,10 +122,11 @@ public class RevVoiceInput{
                 
                 viewController.present(navigationController, animated: true, completion: nil)}
             
-            else{
-                
+            else{if(!SttStreaming.inProcess)
+                {
                 voiceSearchWithoutUi=VoiceInputWithoutUI( apiKey: apikey, appId:appId, domain:domain , lang:lang,  voiceSearchDelegate:voiceInputDelegates,logging: logging)
                 voiceSearchWithoutUi?.startStreaming()
+            }
                 
             }
             

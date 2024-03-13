@@ -32,10 +32,10 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
     private var dataBuffer=Data()
     private var logging=Logging.TRUE
     private var isDissmissed=false
-    private static var inProcess=false
+    static var inProcess=false
     
     //let networkMonitor = NetworkMonitor.shared
-    public init(appId:String,apiKey:String,domain:String,lang:String,logging:String)
+    init(appId:String,apiKey:String,domain:String,lang:String,logging:String)
     {
         self.appId=appId
         self.apiKey=apiKey
@@ -71,21 +71,22 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
             channelLayout: avAudioChannelLayout)
     }()
     
-    public func startStreaming()
+    func startStreaming()
     {   Logger.printLog(string: SttStreaming.inProcess)
         if(!SttStreaming.inProcess)
         {
-        self.dataBuffer.removeAll()
-        socketSetup();
-        recordData();
-        isReceivedData=false
-        SttStreaming.inProcess=true
-        isDissmissed=false
-        self.delegate?.onStartRecording(isTrue: true)
+            self.dataBuffer.removeAll()
+            socketSetup();
+            recordData();
+            isReceivedData=false
+            SttStreaming.inProcess=true
+            isDissmissed=false
+            self.delegate?.onStartRecording(isTrue: true)
         }
-     
+        
     }
-    public func stopStreaming()
+    
+    func stopStreaming()
     {      self.isSocketOpen=false
         SttStreaming.inProcess=false
         isDissmissed=true
@@ -94,12 +95,13 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
         {Logger.printLog(string:"Socket Connection Disconnecting")
             socket.disconnect()
             engine.stop()
-            self.delegate?.onEndRecording(isTrue: true)}
+            self.delegate?.onEndRecording(isTrue: true)
+        }
         self.engine.stop()
         
     }
-    public func stopStreamingForFinal()
-    {            self.isSocketOpen=false
+    func stopStreamingForFinal()
+    {   self.isSocketOpen=false
         self.engine.stop()
         self.engine.inputNode.reset()
         SttStreaming.inProcess=false
@@ -107,7 +109,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
         timer?.invalidate()
         if let data = "--EOF--".data(using: .utf8) {
             // Send the Data using WebSocket
-            self.socket?.write(data: data)
+            socket?.write(data: data)
             //self.socket.disconnect()
         } else {
             Logger.printLog(string:"Failed to convert string to data.")
@@ -118,7 +120,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
     
     func socketSetup() {
         
-        urlStr = "\(Constants.STREAM_URL)?apikey=\(apiKey)&appid=\(appId)&appname=stt_stream&src_lang=\(lang)&domain=\(domain)&logging=\(logging)&timeout=30&silence=2"
+        urlStr = "\(Constants.STREAM_URL)?apikey=\(apiKey)&appid=\(appId)&appname=stt_stream&src_lang=\(lang)&domain=\(domain)&logging=\(logging)&timeout=30&silence=1"
         if(Log.DEBUG)
         {
             urlStr=urlStr+"&debug=true"
@@ -141,20 +143,48 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
                 SttStreaming.inProcess=false
                 self?.delegate?.onError(data: "Connection Timeout")}
         }
-        self.socket.connect()
+        socket.connect()
         
     }
-    
-    public func didReceive(event: Starscream.WebSocketEvent, client: Starscream.WebSocketClient) {
+    func convertTextResponse(text:String)
+    {   //Logger.printLog(string:text)
+        
+        if let str = convertToDictionary(text: text), let displayText = str[JsonLabels.display_text] as? String, let final = str[JsonLabels.final] as? Bool{
+            Logger.printLog(string:displayText)
+            DispatchQueue.main.async {
+                Logger.printLog(string:self.isDissmissed)
+                if(!self.isDissmissed)
+                {     self.delegate?.onResult(data:text)
+                    Logger.printLog(string:"logging here")}
+                Logger.printLog(string:"Current thread \(Thread.current)")
+                Logger.printLog(string:text+"from here")
+                
+            }
+            if(final)
+            {   SttStreaming.inProcess=false
+                self.inputNode.reset()
+                self.inputNode.removeTap(onBus: 0)
+                Logger.printLog(string: "Disconnecting")
+                self.engine.stop()
+                self.isSocketOpen=false
+                socket.disconnect()
+                DispatchQueue.main.async{
+                    Logger.printLog(string:"disconnected called")
+                }
+                Logger.printLog(string:"Current thread \(Thread.current)")
+            }
+            
+            
+        }
+        
+    }
+    func didReceive(event: Starscream.WebSocketEvent, client: Starscream.WebSocketClient) {
         switch event {
         case .connected(_):
             Logger.printLog(string:"Connected")
             timer?.invalidate()
             timer=nil
-            // inputNode.reset()
             isSocketOpen=true
-            
-            
         case .disconnected(_, _):
             if(isSocketOpen)
             {
@@ -163,44 +193,13 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
             Logger.printLog(string:"Disconnected")
             isSocketOpen=false
             SttStreaming.inProcess=false
-            
-            
             self.delegate?.onEndRecording(isTrue: true)
-            
             self.inputNode.reset()
             self.inputNode.removeTap(onBus: 0)
-            
             self.engine.stop()
-            
         case .text(let text):
             isReceivedData=true
-            if let str = convertToDictionary(text: text), let displayText = str[JsonLabels.display_text] as? String, displayText != "", let final = str[JsonLabels.final] as? Bool{
-                Logger.printLog(string:displayText)
-                
-                DispatchQueue.main.async {
-                    if(!self.isDissmissed)
-                    {     self.delegate?.onResult(data:text)}
-                    
-                    Logger.printLog(string:text)
-                    
-                }
-                if(final)
-                {
-                    self.inputNode.reset()
-                    self.inputNode.removeTap(onBus: 0)
-                    Logger.printLog(string: "Disconnecting")
-                    self.engine.stop()
-                    self.isSocketOpen=false
-                    self.socket.disconnect()
-                    SttStreaming.inProcess=false
-                    
-                }
-                
-                
-            }
-            
-            
-            
+            convertTextResponse(text: text)
         case .binary(let data):
             Logger.printLog(string:"Received data: \(data.count)")
         case .ping(_):
@@ -247,7 +246,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
         
         Logger.printLog(string:error.localizedDescription)
         self.delegate?.onError(data: String(describing: error as? NSError))
-//        SttStreaming.inProcess=false
+        //        SttStreaming.inProcess=false
     }
     
     func toNSData(PCMBuffer: AVAudioPCMBuffer) -> Data {
@@ -304,7 +303,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
                 if(self.isSocketOpen){
                     self.socket.write(data: self.dataBuffer)
                     {
-                        Logger.printLog(string:"Socket Write Complete1")
+                        Logger.printLog(string:"Socket Write Complete")
                         self.inputNode.reset()
                         self.dataBuffer.removeAll()
                     }}

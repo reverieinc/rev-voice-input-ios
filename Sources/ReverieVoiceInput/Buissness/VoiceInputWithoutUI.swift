@@ -15,7 +15,7 @@
  */
 
 
-import Foundation
+ import Foundation
 
 /// Class to initiate Voice Search WIthout UI
 class VoiceInputWithoutUI:StreamingDelegate{
@@ -27,7 +27,10 @@ class VoiceInputWithoutUI:StreamingDelegate{
             do {
                 // Decode JSON data into a Person struct
                 let voiceSearchData = try JSONDecoder().decode(VoiceInputResultData.self, from: jsonData)
-                //  Logger.printLog(string:voiceSearchData)
+                if(voiceSearchData.final)
+                {
+                    VoiceInputWithoutUI.inProcess=false
+                }
                 
                 DispatchQueue.main.async{
                     self.voiceSearchDelegate.onResult(data: voiceSearchData)
@@ -46,6 +49,7 @@ class VoiceInputWithoutUI:StreamingDelegate{
     
     func onError(data: String) {
         self.voiceSearchDelegate.onError(data: data)
+        VoiceInputWithoutUI.inProcess=false
     }
     
     func onStartRecording(isTrue: Bool) {
@@ -57,6 +61,7 @@ class VoiceInputWithoutUI:StreamingDelegate{
     }
     func onEndRecording(isTrue: Bool) {
         self.voiceSearchDelegate.onRecordingEnd(isTrue: isTrue)
+        VoiceInputWithoutUI.inProcess=false
     }
     var apiKey:String
     var appId:String
@@ -64,6 +69,7 @@ class VoiceInputWithoutUI:StreamingDelegate{
     var lang:String
     var voiceSearchDelegate:VoiceInputDelegates
     var sttStreaming:SttStreaming
+    static var inProcess: Bool = false
     var isStreaming=false
     var logging:String
     
@@ -79,23 +85,25 @@ class VoiceInputWithoutUI:StreamingDelegate{
     }
     
     func startStreaming()
-    {   isStreaming=true
+    {   if(!VoiceInputWithoutUI.inProcess){
+        isStreaming=true
         sttStreaming.startStreaming()
-        
+        VoiceInputWithoutUI.inProcess=true
+    }
         
     }
     func stopStreamingForFinal()
-    {
+    {    VoiceInputWithoutUI.inProcess=false
         if(isStreaming)
-        {
+        {Logger.printLog(string: "Stoping Final")
             sttStreaming.stopStreamingForFinal()
             isStreaming=false
         }
     }
     func stopStreaming()
-    {
+    {   VoiceInputWithoutUI.inProcess=false
         if(isStreaming)
-        {
+        {   Logger.printLog(string: "Stoping")
             sttStreaming.stopStreaming()
             isStreaming=false
             
