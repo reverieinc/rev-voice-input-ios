@@ -61,7 +61,10 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
     var inputNode : AVAudioInputNode!
     var isReceivedData=false
     var timer:Timer?
+    var noInputTimeout=2
     var urlStr = ""
+    var silence=1
+    var timeout=15
     lazy var downAudioFormat: AVAudioFormat = {
         let avAudioChannelLayout = AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Mono)!
         return AVAudioFormat(
@@ -70,7 +73,21 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
             interleaved: true,
             channelLayout: avAudioChannelLayout)
     }()
-    
+    func setNoInputTimeout(noInputTimeout:Int)
+    {
+        self.noInputTimeout=noInputTimeout
+
+    }
+    func setSilence(silence:Int)
+    {
+        self.silence=silence
+        
+    }
+    func setTimeout(timeout:Int)
+    {
+        self.timeout=timeout
+        
+    }
     func startStreaming()
     {   Logger.printLog(string: SttStreaming.inProcess)
         if(!SttStreaming.inProcess)
@@ -87,7 +104,8 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
     }
     
     func stopStreaming()
-    {      self.isSocketOpen=false
+    {
+        self.isSocketOpen=false
         SttStreaming.inProcess=false
         isDissmissed=true
         timer?.invalidate()
@@ -120,7 +138,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
     
     func socketSetup() {
         
-        urlStr = "\(Constants.STREAM_URL)?apikey=\(apiKey)&appid=\(appId)&appname=stt_stream&src_lang=\(lang)&domain=\(domain)&logging=\(logging)&timeout=30&silence=1"
+        urlStr = "\(Constants.STREAM_URL)?apikey=\(apiKey)&appid=\(appId)&appname=stt_stream&src_lang=\(lang)&domain=\(domain)&logging=\(logging)&timeout=\(timeout)&silence=\(silence)&no_input_timeout=\(noInputTimeout)"
         if(Log.DEBUG)
         {
             urlStr=urlStr+"&debug=true"
@@ -147,8 +165,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
         
     }
     func convertTextResponse(text:String)
-    {   //Logger.printLog(string:text)
-        
+    {
         if let str = convertToDictionary(text: text), let displayText = str[JsonLabels.display_text] as? String, let final = str[JsonLabels.final] as? Bool{
             Logger.printLog(string:displayText)
             DispatchQueue.main.async {

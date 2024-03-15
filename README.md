@@ -121,6 +121,23 @@ Various constant values are provided in SDK for DOMAIN, LANGUAGES, and LOGGING p
      voiceInput.cancel()
      
     ```
+ 
+6. (Optional) To Set the No Input Timeout
+    ```sh
+      voiceInput.setNoInputTimeout(noInputTimeout: 6)
+   ```
+7. (Optional) To Set the the TimeOut    
+    ```sh
+      voiceInput.setTimeout(timeout: 5)
+    ```
+8. (Optional) To Set the Silence
+    ```sh
+      voiceInput.setSilence(silence: 2)
+    ```
+9. (Optional) To Enable Logging(Logcat)
+    ```sh
+        Log.DEBUG=true
+    ```     
 
 
 

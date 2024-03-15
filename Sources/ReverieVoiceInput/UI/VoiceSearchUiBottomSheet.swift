@@ -105,7 +105,7 @@ class VoiceSearchUiBottomSheet: UIViewController ,StreamingDelegate{
     private var sttStreaming:SttStreaming
     private var logging:String
     private var isGotResponse=false
-    init( apiKey: String, appID: String, lang: String, domain: String, voiceSearchResultDelegates: VoiceInputDelegates,logging:String) {
+    init( apiKey: String, appID: String, lang: String, domain: String, voiceSearchResultDelegates: VoiceInputDelegates,logging:String,noInputTimeout:Int,silence:Int,timeout:Int) {
         self.apiKey = apiKey
         self.appID = appID
         self.lang = lang
@@ -113,6 +113,9 @@ class VoiceSearchUiBottomSheet: UIViewController ,StreamingDelegate{
         self.voiceSearchResultDelegates = voiceSearchResultDelegates
         self.logging=logging
         sttStreaming=SttStreaming(appId: appID, apiKey: apiKey, domain: domain, lang: lang,logging: logging)
+        sttStreaming.setSilence(silence: silence)
+        sttStreaming.setTimeout(timeout: timeout)
+        sttStreaming.setNoInputTimeout(noInputTimeout: noInputTimeout)
         super.init(nibName: nil, bundle: nil)
         
     }
@@ -213,9 +216,10 @@ class VoiceSearchUiBottomSheet: UIViewController ,StreamingDelegate{
     
         
     }
-    func setupUI() {
+    func setupUI()
+    {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(micGestureMethod(_:)))
-
+    
         self.micImageView.isUserInteractionEnabled=true
         self.outputLabel.isUserInteractionEnabled=true
         self.micImageView.addGestureRecognizer(tapGesture)

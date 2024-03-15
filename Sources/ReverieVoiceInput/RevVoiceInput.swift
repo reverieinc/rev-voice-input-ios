@@ -31,6 +31,9 @@ public class RevVoiceInput{
     var voiceSearchWithoutUi:VoiceInputWithoutUI?
     var networkMonitor=NetworkMonitor.shared
     var logging:String
+    var noInputTimeout=2
+    var silence=1
+    var timeout=15
     
     
     
@@ -58,7 +61,7 @@ public class RevVoiceInput{
     /// - Parameters:
     ///   - apikey:apikey provided to the client
     ///   - appId:appId provided to the client
-    public  init( apikey: String, appId: String,logging:String) {
+    public init( apikey: String, appId: String,logging:String) {
         
         self.apikey = apikey
         self.appId = appId
@@ -69,7 +72,24 @@ public class RevVoiceInput{
         
     }
     
+    public func setNoInputTimeout(noInputTimeout:Int)
+    {
+        
+        self.noInputTimeout=noInputTimeout
+        
+    }
     
+    public func setSilence(silence:Int)
+    {
+        
+        self.silence=silence
+    }
+    
+    public func setTimeout(timeout:Int)
+    {
+        self.timeout=timeout
+        
+    }
     /// This function is used to start Voice Search
     /// - Parameters:
     ///   - viewController:Instance of current ViewController
@@ -89,7 +109,7 @@ public class RevVoiceInput{
             
         }
             if(isUIRequired){
-                let popupViewController = VoiceSearchUiBottomSheet(apiKey: apikey, appID: appId, lang: self.lang, domain: self.domain,voiceSearchResultDelegates: voiceInputDelegates,logging: logging)
+                let popupViewController = VoiceSearchUiBottomSheet(apiKey: apikey, appID: appId, lang: self.lang, domain: self.domain,voiceSearchResultDelegates: voiceInputDelegates,logging: logging,noInputTimeout: noInputTimeout,silence: silence,timeout: timeout)
                 let navigationController = TransparentNavigationController(rootViewController: popupViewController)
                 navigationController.modalPresentationStyle = .overCurrentContext
                 
@@ -97,7 +117,7 @@ public class RevVoiceInput{
             
             else{
                 if(!SttStreaming.inProcess)
-                {  voiceSearchWithoutUi=VoiceInputWithoutUI( apiKey: apikey, appId:appId, domain:domain , lang:lang,  voiceSearchDelegate:voiceInputDelegates,logging: logging)
+                {  voiceSearchWithoutUi=VoiceInputWithoutUI( apiKey: apikey, appId:appId, domain:domain , lang:lang,  voiceSearchDelegate:voiceInputDelegates,logging: logging,noInputTimeout: noInputTimeout,silence: silence,timeout: timeout)
                     voiceSearchWithoutUi?.startStreaming()}
                 
             }
@@ -116,17 +136,16 @@ public class RevVoiceInput{
         
       
             if(isUIRequired){
-                let popupViewController = VoiceSearchUiBottomSheet(apiKey: apikey, appID: appId, lang: lang, domain: domain,voiceSearchResultDelegates: voiceInputDelegates, logging: logging)
+                let popupViewController = VoiceSearchUiBottomSheet(apiKey: apikey, appID: appId, lang: lang, domain: domain,voiceSearchResultDelegates: voiceInputDelegates, logging: logging,noInputTimeout: noInputTimeout,silence: silence,timeout: timeout)
                 let navigationController = TransparentNavigationController(rootViewController: popupViewController)
                 navigationController.modalPresentationStyle = .overCurrentContext
                 
                 viewController.present(navigationController, animated: true, completion: nil)}
             
-            else{if(!SttStreaming.inProcess)
-                {
-                voiceSearchWithoutUi=VoiceInputWithoutUI( apiKey: apikey, appId:appId, domain:domain , lang:lang,  voiceSearchDelegate:voiceInputDelegates,logging: logging)
+            else{
+                
+                voiceSearchWithoutUi=VoiceInputWithoutUI( apiKey: apikey, appId:appId, domain:domain , lang:lang,  voiceSearchDelegate:voiceInputDelegates,logging: logging,noInputTimeout: noInputTimeout,silence: silence,timeout: timeout)
                 voiceSearchWithoutUi?.startStreaming()
-            }
                 
             }
             
