@@ -62,6 +62,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
     var isReceivedData=false
     var timer:Timer?
     var noInputTimeout=2
+    var isCancel=false
     var urlStr = ""
     var silence=1
     var timeout=15
@@ -91,7 +92,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
     func startStreaming()
     {   Logger.printLog(string: SttStreaming.inProcess)
         if(!SttStreaming.inProcess)
-        {
+        {   isCancel=false
             self.dataBuffer.removeAll()
             socketSetup();
             recordData();
@@ -104,18 +105,20 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
     }
     
     func stopStreaming()
-    {
+    { if(isSocketOpen)
+        {   isCancel=true
+            Logger.printLog(string:"Socket Connection Disconnecting")
+            socket.disconnect()
+            engine.stop()
+            self.delegate?.onEndRecording(isTrue: true)
+       
+        }
+        self.engine.stop()
         self.isSocketOpen=false
         SttStreaming.inProcess=false
         isDissmissed=true
         timer?.invalidate()
-        if(isSocketOpen)
-        {Logger.printLog(string:"Socket Connection Disconnecting")
-            socket.disconnect()
-            engine.stop()
-            self.delegate?.onEndRecording(isTrue: true)
-        }
-        self.engine.stop()
+       
         
     }
     func stopStreamingForFinal()
@@ -165,7 +168,8 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
         
     }
     func convertTextResponse(text:String)
-    {
+    {   //Logger.printLog(string:text)
+        
         if let str = convertToDictionary(text: text), let displayText = str[JsonLabels.display_text] as? String, let final = str[JsonLabels.final] as? Bool{
             Logger.printLog(string:displayText)
             DispatchQueue.main.async {
@@ -209,6 +213,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
             }
             Logger.printLog(string:"Disconnected")
             isSocketOpen=false
+            
             SttStreaming.inProcess=false
             self.delegate?.onEndRecording(isTrue: true)
             self.inputNode.reset()
@@ -230,10 +235,13 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
         case .cancelled:
             self.inputNode.reset()
             self.inputNode.removeTap(onBus: 0)
-            self.delegate?.onEndRecording(isTrue: true)
+            if(!isCancel)
+            {
+                self.delegate?.onEndRecording(isTrue: true)
+            }
             self.engine.stop()
             SttStreaming.inProcess=false
-            
+            isCancel=false
             isSocketOpen=false
             Logger.printLog(string:"Cancelled")
         case .error(let error):
@@ -242,6 +250,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
             self.delegate?.onEndRecording(isTrue: true)
             self.engine.stop()
             SttStreaming.inProcess=false
+          
             Logger.printLog(string:"Error Ns \(String(describing: error as? NSError))")
             self.isSocketOpen=false
             DispatchQueue.main.async {

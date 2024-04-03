@@ -71,7 +71,22 @@ Various constant values are provided in SDK for DOMAIN, LANGUAGES, and LOGGING p
 
 ## Integrate the SDK in Your Application
 
+
 1.Add the Swift Package using SPM and if using version lower than XCode 15 add Apple's  AVFAudio.framework without embedding
+
+### Optional Parameters
+| Parameter | Type   | Description                                | Swift  code                         | 
+|-----------|--------|--------------------------------------------|-----------------------------------|
+| timeout   | int  | [Description](#Description-of-Parameters)  | `voiceInput.setTimeout(timeout:5)`   | 
+| silence   | int  | [Description](#Description-of-Parameters)  | `voiceInput.setSilence(silence:1)`   | 
+| noInputTimeout   | int  | [Description](#Description-of-Parameters)  | `    voiceInput.setNoInputTimeout(noInputTimeout: 6))`   | 
+
+### Description of Parameters
+1. **timeout**:The duration to keep a connection open between the application and the STT server.   
+           Note: The default `"timeout = 15 seconds`", and the maximum time allowed = 180 seconds
+2. **silence**:The time to determine when to end the connection automatically after detecting the silence after receiving the speech data. 
+           Example:Consider `"silence = 15 seconds"` i.e., On passing the speech for 60 seconds, and if you remain silent, the connection will be open for the next 15 seconds and then will automatically get disconnected. 
+           Note: The default silence= 1 second, and the maximum `"silence = 30 seconds"`.
 
 ### iOS UiKit Integration
 
