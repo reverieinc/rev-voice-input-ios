@@ -73,7 +73,7 @@ class VoiceInputWithoutUI:StreamingDelegate{
     var isStreaming=false
     var logging:String
     
-    init(apiKey: String, appId: String, domain: String, lang: String, voiceSearchDelegate: VoiceInputDelegates,logging:String,noInputTimeout:Int,silence:Int,timeout:Int) {
+    init(apiKey: String, appId: String, domain: String, lang: String, voiceSearchDelegate: VoiceInputDelegates,logging:String,noInputTimeout:Double,silence:Double,timeout:Double) {
         self.apiKey = apiKey
         self.appId = appId
         self.domain = domain

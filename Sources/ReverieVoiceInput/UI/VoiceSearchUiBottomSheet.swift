@@ -105,7 +105,7 @@ class VoiceSearchUiBottomSheet: UIViewController ,StreamingDelegate{
     private var sttStreaming:SttStreaming
     private var logging:String
     private var isGotResponse=false
-    init( apiKey: String, appID: String, lang: String, domain: String, voiceSearchResultDelegates: VoiceInputDelegates,logging:String,noInputTimeout:Int,silence:Int,timeout:Int) {
+    init( apiKey: String, appID: String, lang: String, domain: String, voiceSearchResultDelegates: VoiceInputDelegates,logging:String,noInputTimeout:Double,silence:Double,timeout:Double) {
         self.apiKey = apiKey
         self.appID = appID
         self.lang = lang

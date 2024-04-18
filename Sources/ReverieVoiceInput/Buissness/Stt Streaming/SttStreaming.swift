@@ -61,11 +61,11 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
     var inputNode : AVAudioInputNode!
     var isReceivedData=false
     var timer:Timer?
-    var noInputTimeout=2
+    var noInputTimeout=2.0
     var isCancel=false
     var urlStr = ""
-    var silence=1
-    var timeout=15
+    var silence=1.0
+    var timeout=15.0
     lazy var downAudioFormat: AVAudioFormat = {
         let avAudioChannelLayout = AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_Mono)!
         return AVAudioFormat(
@@ -74,17 +74,17 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
             interleaved: true,
             channelLayout: avAudioChannelLayout)
     }()
-    func setNoInputTimeout(noInputTimeout:Int)
+    func setNoInputTimeout(noInputTimeout:Double)
     {
         self.noInputTimeout=noInputTimeout
 
     }
-    func setSilence(silence:Int)
+    func setSilence(silence:Double)
     {
         self.silence=silence
         
     }
-    func setTimeout(timeout:Int)
+    func setTimeout(timeout:Double)
     {
         self.timeout=timeout
         

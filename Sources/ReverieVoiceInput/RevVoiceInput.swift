@@ -31,9 +31,9 @@ public class RevVoiceInput{
     var voiceSearchWithoutUi:VoiceInputWithoutUI?
     var networkMonitor=NetworkMonitor.shared
     var logging:String
-    var noInputTimeout=2
-    var silence=1
-    var timeout=15
+    var noInputTimeout=2.0
+    var silence=1.0
+    var timeout=15.0
     
     
     
@@ -72,20 +72,20 @@ public class RevVoiceInput{
         
     }
     
-    public func setNoInputTimeout(noInputTimeout:Int)
+    public func setNoInputTimeout(noInputTimeout:Double)
     {
         
         self.noInputTimeout=noInputTimeout
         
     }
     
-    public func setSilence(silence:Int)
+    public func setSilence(silence:Double)
     {
         
         self.silence=silence
     }
     
-    public func setTimeout(timeout:Int)
+    public func setTimeout(timeout:Double)
     {
         self.timeout=timeout
         
