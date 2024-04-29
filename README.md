@@ -73,7 +73,7 @@ Various constant values are provided in SDK for DOMAIN, LANGUAGES, and LOGGING p
 
 
 1.Add the Swift Package using SPM and if using version lower than XCode 15 add Apple's  AVFAudio.framework without embedding
-
+Note: Privacy Manifest has been added to the SDK as per Apple's Compliance.
 ### Optional Parameters
 | Parameter | Type   | Description                                | Swift  code                         | 
 |-----------|--------|--------------------------------------------|-----------------------------------|

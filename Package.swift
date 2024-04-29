@@ -14,7 +14,7 @@ let package = Package(
             targets: ["ReverieVoiceInput"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/daltoniam/Starscream.git", from: "4.0.6")
+        .package(url: "https://github.com/daltoniam/Starscream.git", from: "4.0.8")
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
     ],
