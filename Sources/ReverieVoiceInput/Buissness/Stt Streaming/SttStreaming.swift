@@ -50,7 +50,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
     
     private var delegate:StreamingDelegate?
     
-    var socket : WebSocket!
+    var socket : Starscream.WebSocket!
     public func setDelegate(delegate:StreamingDelegate)
     {
         self.delegate=delegate
@@ -151,7 +151,7 @@ class SttStreaming :NSObject,WebSocketDelegate, AVAudioRecorderDelegate{
         
         let request = URLRequest(url: URL(string: urlStr)!)
         
-        socket = WebSocket(request: request)
+        socket = Starscream.WebSocket(request: request)
         socket.delegate = self
         
         let timeoutInterval: TimeInterval = 10
